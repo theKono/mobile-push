@@ -58,3 +58,4 @@ target/
 
 production.ini
 development.ini
+pylint
