@@ -58,5 +58,6 @@ target/
 
 production.ini
 development.ini
+test.ini
 pylint
 *.sqlite
