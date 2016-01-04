@@ -13,6 +13,6 @@ __all__ = ['setting']
 
 
 setting = SafeConfigParser()
-env = os.environ.get('MOBILE_PUSH_ENV', 'development')
+env = os.environ['MOBILE_PUSH_ENV']
 cwd = os.path.dirname(os.path.abspath(__file__))
 setting.read(os.path.join(cwd, '..', env + '.ini'))
