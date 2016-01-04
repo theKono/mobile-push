@@ -20,6 +20,10 @@ class CreateApnsTokenActor(BaseActor):
         super(CreateApnsTokenActor, self).__init__()
         self.sns_conn = connect_to_region(setting.get('sns', 'region'))
 
+    def iter_application_arns(self):
+
+        return (arn for _, arn in setting.items('sns:apns-applications'))
+
     def run(self, message):
 
         args = message.get('args', {})
@@ -30,7 +34,7 @@ class CreateApnsTokenActor(BaseActor):
             logger.warn('`token` is not present')
             return
 
-        for _, arn in setting.items('sns:apns-applications'):
+        for arn in self.iter_application_arns():
             try:
                 self.sns_conn.create_platform_endpoint(
                     platform_application_arn=arn,
@@ -38,9 +42,11 @@ class CreateApnsTokenActor(BaseActor):
                     custom_user_data=ujson.dumps(user_data)
                 )
                 logger.info(
-                    'Create APNS platform endpoint(%s, %s)',
+                    ('create_platform_endpoint(platform_application_arn=%s, '
+                     'token=%s, custom_user_data=%s)'),
+                    arn,
                     token,
-                    ujson.dumps(user_data)
+                    ujson.dumps(user_data),
                 )
 
             except BotoServerError as e:
