@@ -6,6 +6,7 @@
 # third party related imports
 
 # local library imports
+from mobile_push.actors.create_topic import CreateTopicActor
 
 
 class MessageRouter(object):
@@ -17,7 +18,7 @@ class MessageRouter(object):
         """Raises when it is an unrecognizable action."""
 
     TABLE = {
-
+        'create_topic': CreateTopicActor,
     }
 
     def __init__(self, message):
