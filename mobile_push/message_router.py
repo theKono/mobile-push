@@ -6,6 +6,8 @@
 # third party related imports
 
 # local library imports
+from mobile_push.actors.create_apns_token import CreateApnsTokenActor
+from mobile_push.actors.create_gcm_token import CreateGcmTokenActor
 from mobile_push.actors.create_topic import CreateTopicActor
 
 
@@ -19,6 +21,8 @@ class MessageRouter(object):
 
     TABLE = {
         'create_topic': CreateTopicActor,
+        'create_apns_token': CreateApnsTokenActor,
+        'create_gcm_token': CreateGcmTokenActor,
     }
 
     def __init__(self, message):

@@ -49,6 +49,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.log.*
 
 # Sphinx documentation
 docs/_build/
@@ -61,3 +62,4 @@ development.ini
 test.ini
 pylint
 *.sqlite
+*.swp
