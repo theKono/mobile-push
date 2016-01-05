@@ -10,7 +10,7 @@ import ujson
 # local library imports
 from mobile_push.actors.subscribe_topic import SubscribeTopicActor
 from mobile_push.config import setting
-from mobile_push.db import ApnsToken, GcmToken, Session
+from mobile_push.db import ApnsToken, GcmToken, Session, Topic
 from ..base import BaseTestCase
 
 
@@ -49,3 +49,23 @@ class TestFindTokenEndpointArns(BaseTestCase):
     def test_when_there_is_no_such_token(self):
 
         self.assertEqual(self.actor.find_token_endpoint_arns('gg'), [])
+
+
+class TestFindTopicArn(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = SubscribeTopicActor()
+
+    def test_when_ther_exists_a_topic(self):
+
+        session = Session()
+        t = Topic(name='qq', arn='arn')
+        session.add(t)
+        session.commit()
+
+        self.assertEqual(self.actor.find_topic_arn('qq'), t)
+
+    def test_when_there_is_no_such_topic(self):
+
+        self.assertIsNone(self.actor.find_topic_arn('qq'))
