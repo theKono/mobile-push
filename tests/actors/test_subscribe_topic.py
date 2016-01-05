@@ -86,3 +86,20 @@ class TestCallSnsApi(BaseTestCase):
             'application',
             'endpoint-arn'
         )
+
+
+class TestGetArnFromResponse(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = SubscribeTopicActor()
+
+    def test(self):
+
+        resp = {
+            'SubscribeResponse': {
+                'ResponseMetadata': {'RequestId': 'xxx'},
+                'SubscribeResult': {'SubscriptionArn': 'arn'}
+            }
+        }
+        self.assertEqual(self.actor.get_arn_from_response(resp), 'arn')
