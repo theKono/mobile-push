@@ -12,6 +12,7 @@ from mobile_push.models.base import Base
 
 # We should import all model before we can create all tables
 from mobile_push.models.apns_token import ApnsToken
+from mobile_push.models.gcm_token import GcmToken
 from mobile_push.models.topic import Topic
 
 
