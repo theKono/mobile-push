@@ -69,3 +69,20 @@ class TestFindTopicArn(BaseTestCase):
     def test_when_there_is_no_such_topic(self):
 
         self.assertIsNone(self.actor.find_topic_arn('qq'))
+
+
+class TestCallSnsApi(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = SubscribeTopicActor()
+        self.actor.sns_conn = MagicMock()
+
+    def test(self):
+
+        self.actor.call_sns_api('topic-arn', 'endpoint-arn')
+        self.actor.sns_conn.subscribe.assert_called_with(
+            'topic-arn',
+            'application',
+            'endpoint-arn'
+        )
