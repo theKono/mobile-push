@@ -4,6 +4,7 @@
 
 # third party related imports
 from mock import MagicMock
+import ujson
 
 # local library imports
 from mobile_push.actors.create_apns_token import CreateApnsTokenActor
@@ -66,6 +67,32 @@ class TestGetEndpointArnFromResponse(BaseTestCase):
             'an-arn'
         )
 
+
+class TestGetEndpointArnFromErrorMessage(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = CreateApnsTokenActor()
+
+    def test(self):
+
+        message = ujson.dumps({
+            'Error': {
+                'Code': 'InvalidParameter',
+                'Message': (
+                    'Invalid parameter: Token Reason: Endpoint xxx already '
+                    'exists with the same Token, but different attributes.'
+                ),
+                'Type': 'Sender'
+            },
+            'RequestId': 'ooxx'
+        })
+        err = Exception(message)
+
+        self.assertEqual(
+            self.actor.get_endpoint_arn_from_error_message(err),
+            'xxx'
+        )
 
 class TestRun(BaseTestCase):
 
