@@ -3,43 +3,42 @@
 # standard library imports
 
 # third party related imports
-from mock import MagicMock
 
 # local library imports
 from mobile_push.actors.create_gcm_token import CreateGcmTokenActor
 from mobile_push.config import setting
+from mobile_push.db import GcmToken, Session
 from ..base import BaseTestCase
 
 
-class TestRun(BaseTestCase):
+class TestIterApplicationArns(BaseTestCase):
 
     def setUp(self):
 
         self.actor = CreateGcmTokenActor()
-        self.actor.sns_conn = MagicMock()
 
-    def test_when_token_is_not_present(self):
+    def test(self):
 
-        self.actor.run({'args': {}})
-        self.assertFalse(self.actor.sns_conn.create_platform_endpoint.called)
+        self.assertEqual(
+            list(self.actor.iter_application_arns()),
+            [pair[1] for pair in setting.items('sns:gcm-applications')]
+        )
 
-    def test_when_everything_is_ok(self):
 
-        self.actor.sns_conn.create_platform_endpoint.return_value = {
-            'CreatePlatformEndpointResponse': {
-                'CreatePlatformEndpointResult': {'EndpointArn': 'an-arn'},
-                'ResponseMetadata': {'RequestId': 'xxx'}
-            }
-        }
+class TestSaveEndpointArn(BaseTestCase):
 
-        self.actor.run({'args': {'token': 'qq', 'user_data': {}}})
-        call_args = self.actor.sns_conn.create_platform_endpoint.call_args_list
+    def setUp(self):
 
-        for ix, (_, arn) in enumerate(setting.items('sns:gcm-applications')):
-            args, kwargs = call_args[ix]
-            self.assertEqual(kwargs, {
-                'platform_application_arn': arn,
-                'token': 'qq',
-                'custom_user_data': '{}'
-            })
+        self.actor = CreateGcmTokenActor()
 
+    def test(self):
+
+        self.actor.save_endpoint_arn('app-arn', 'token', 'qq', 'endpoint_arn')
+
+        session = Session()
+        gcm_token = session.query(GcmToken).first()
+
+        self.assertEqual(gcm_token.token, 'token')
+        self.assertEqual(gcm_token.application_arn, 'app-arn')
+        self.assertEqual(gcm_token.endpoint_arn, 'endpoint_arn')
+        self.assertEqual(gcm_token.user_data, 'qq')
