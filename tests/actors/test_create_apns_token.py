@@ -9,6 +9,7 @@ import ujson
 # local library imports
 from mobile_push.actors.create_apns_token import CreateApnsTokenActor
 from mobile_push.config import setting
+from mobile_push.db import ApnsToken, Session
 from ..base import BaseTestCase
 
 
@@ -93,6 +94,26 @@ class TestGetEndpointArnFromErrorMessage(BaseTestCase):
             self.actor.get_endpoint_arn_from_error_message(err),
             'xxx'
         )
+
+
+class TestSaveEndpointArn(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = CreateApnsTokenActor()
+
+    def test(self):
+
+        self.actor.save_endpoint_arn('app-arn', 'token', 'qq', 'endpoint_arn')
+
+        session = Session()
+        apns_token = session.query(ApnsToken).first()
+
+        self.assertEqual(apns_token.token, 'token')
+        self.assertEqual(apns_token.application_arn, 'app-arn')
+        self.assertEqual(apns_token.endpoint_arn, 'endpoint_arn')
+        self.assertEqual(apns_token.user_data, 'qq')
+
 
 class TestRun(BaseTestCase):
 
