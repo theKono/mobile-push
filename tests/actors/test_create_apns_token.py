@@ -47,6 +47,26 @@ class TestCallSnsApi(BaseTestCase):
         )
 
 
+class TestGetEndpointArnFromResponse(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = CreateApnsTokenActor()
+
+    def test(self):
+
+        api_response = {
+            'CreatePlatformEndpointResponse': {
+                'CreatePlatformEndpointResult': {'EndpointArn': 'an-arn'},
+                'ResponseMetadata': {'RequestId': 'xxx'}
+            }
+        }
+        self.assertEqual(
+            self.actor.get_endpoint_arn_from_response(api_response),
+            'an-arn'
+        )
+
+
 class TestRun(BaseTestCase):
 
     def setUp(self):
