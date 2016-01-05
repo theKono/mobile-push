@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+# standard library imports
+
+# third party related imports
+from boto.exception import BotoServerError
+from mock import MagicMock
+import ujson
+
+# local library imports
+from mobile_push.actors.subscribe_topic import SubscribeTopicActor
+from mobile_push.config import setting
+from mobile_push.db import ApnsToken, GcmToken, Session
+from ..base import BaseTestCase
+
+
+class TestFindTokenEndpointArns(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = SubscribeTopicActor()
+
+    def test_when_there_exists_an_apns_token(self):
+
+        session = Session()
+        at = ApnsToken(
+            token='qq',
+            application_arn='app-arn',
+            endpoint_arn='arn'
+        )
+        session.add(at)
+        session.commit()
+
+        self.assertEqual(self.actor.find_token_endpoint_arns('qq'), [at])
+
+    def test_when_there_exists_a_gcm_token(self):
+
+        session = Session()
+        gt = GcmToken(
+            token='qq',
+            application_arn='app-arn',
+            endpoint_arn='arn'
+        )
+        session.add(gt)
+        session.commit()
+
+        self.assertEqual(self.actor.find_token_endpoint_arns('qq'), [gt])
+
+    def test_when_there_is_no_such_token(self):
+
+        self.assertEqual(self.actor.find_token_endpoint_arns('gg'), [])
