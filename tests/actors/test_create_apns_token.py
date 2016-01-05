@@ -25,6 +25,28 @@ class TestIterApplicationArns(BaseTestCase):
         )
 
 
+class TestCallSnsApi(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = CreateApnsTokenActor()
+        self.actor.sns_conn = MagicMock()
+
+    def test(self):
+
+        app_arn = 'an-app-arn'
+        token = 'a-token'
+        user_data = 'this is user data'
+
+        self.actor.sns_conn.create_platform_endpoint.return_value = True
+        self.assertTrue(self.actor.call_sns_api(app_arn, token, user_data))
+        self.actor.sns_conn.create_platform_endpoint.assert_called_with(
+            platform_application_arn=app_arn,
+            token=token,
+            custom_user_data=user_data
+        )
+
+
 class TestRun(BaseTestCase):
 
     def setUp(self):
