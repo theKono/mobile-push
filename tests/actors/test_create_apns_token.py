@@ -11,6 +11,20 @@ from mobile_push.config import setting
 from ..base import BaseTestCase
 
 
+class TestIterApplicationArns(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = CreateApnsTokenActor()
+
+    def test(self):
+
+        self.assertEqual(
+            list(self.actor.iter_application_arns()),
+            [pair[1] for pair in setting.items('sns:apns-applications')]
+        )
+
+
 class TestRun(BaseTestCase):
 
     def setUp(self):
@@ -42,4 +56,3 @@ class TestRun(BaseTestCase):
                 'token': 'qq',
                 'custom_user_data': '{}'
             })
-
