@@ -10,7 +10,7 @@ import ujson
 # local library imports
 from mobile_push.actors.subscribe_topic import SubscribeTopicActor
 from mobile_push.config import setting
-from mobile_push.db import ApnsToken, GcmToken, Session, Topic
+from mobile_push.db import ApnsToken, GcmToken, Session, Subscription, Topic
 from ..base import BaseTestCase
 
 
@@ -103,3 +103,19 @@ class TestGetArnFromResponse(BaseTestCase):
             }
         }
         self.assertEqual(self.actor.get_arn_from_response(resp), 'arn')
+
+
+class TestSaveSubscription(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = SubscribeTopicActor()
+
+    def test(self):
+
+        self.actor.save_subscription('t-arn', 'e-arn', 's-arn')
+
+        s = Session().query(Subscription).first()
+        self.assertEqual(s.topic_arn, 't-arn')
+        self.assertEqual(s.endpoint_arn, 'e-arn')
+        self.assertEqual(s.subscription_arn, 's-arn')
