@@ -3,6 +3,7 @@
 # standard library imports
 
 # third party related imports
+from boto.exception import BotoServerError
 from mock import MagicMock
 import ujson
 
@@ -77,7 +78,7 @@ class TestGetEndpointArnFromErrorMessage(BaseTestCase):
 
     def test(self):
 
-        message = ujson.dumps({
+        err = Exception(ujson.dumps({
             'Error': {
                 'Code': 'InvalidParameter',
                 'Message': (
@@ -87,8 +88,7 @@ class TestGetEndpointArnFromErrorMessage(BaseTestCase):
                 'Type': 'Sender'
             },
             'RequestId': 'ooxx'
-        })
-        err = Exception(message)
+        }))
 
         self.assertEqual(
             self.actor.get_endpoint_arn_from_error_message(err),
@@ -125,24 +125,48 @@ class TestRun(BaseTestCase):
     def test_when_token_is_not_present(self):
 
         self.actor.run({'args': {}})
-        self.assertFalse(self.actor.sns_conn.create_platform_endpoint.called)
+        self.actor.call_sns_api = MagicMock()
+        self.assertFalse(self.actor.call_sns_api.called)
+
+    def test_when_sns_api_raises_boto_server_error(self):
+
+        err = BotoServerError(403, 'qq')
+
+        self.actor.iter_application_arns = MagicMock(return_value=['app-arn'])
+        self.actor.call_sns_api = MagicMock(side_effect=err)
+        self.actor.get_endpoint_arn_from_error_message = \
+            MagicMock(return_value='arn')
+        self.actor.save_endpoint_arn = MagicMock()
+
+        self.actor.run({'args': {'token': 'qq', 'user_data': {}}})
+
+        self.actor.call_sns_api.assert_called_with('app-arn', 'qq', '{}')
+        self.actor.get_endpoint_arn_from_error_message.assert_called_with(err)
+        self.actor.save_endpoint_arn.assert_called_with(
+            'app-arn',
+            'qq',
+            '{}',
+            'arn'
+        )
 
     def test_when_everything_is_ok(self):
 
-        self.actor.sns_conn.create_platform_endpoint.return_value = {
-            'CreatePlatformEndpointResponse': {
-                'CreatePlatformEndpointResult': {'EndpointArn': 'an-arn'},
-                'ResponseMetadata': {'RequestId': 'xxx'}
-            }
-        }
+        api_response = MagicMock()
+        self.actor.iter_application_arns = MagicMock(return_value=['app-arn'])
+        self.actor.call_sns_api = MagicMock(return_value=api_response)
+        self.actor.get_endpoint_arn_from_response = \
+            MagicMock(return_value='arn')
+        self.actor.save_endpoint_arn = MagicMock()
 
         self.actor.run({'args': {'token': 'qq', 'user_data': {}}})
-        call_args = self.actor.sns_conn.create_platform_endpoint.call_args_list
 
-        for ix, (_, arn) in enumerate(setting.items('sns:apns-applications')):
-            args, kwargs = call_args[ix]
-            self.assertEqual(kwargs, {
-                'platform_application_arn': arn,
-                'token': 'qq',
-                'custom_user_data': '{}'
-            })
+        self.actor.call_sns_api.assert_called_with('app-arn', 'qq', '{}')
+        self.actor.get_endpoint_arn_from_response.assert_called_with(
+            api_response
+        )
+        self.actor.save_endpoint_arn.assert_called_with(
+            'app-arn',
+            'qq',
+            '{}',
+            'arn'
+        )
