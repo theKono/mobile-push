@@ -6,16 +6,17 @@
 from mock import MagicMock
 
 # local library imports
-from mobile_push.actors.subscribe_topic import SubscribeTopicActor
+from mobile_push.actors.unsubscribe_topic import UnsubscribeTopicActor
 from mobile_push.db import ApnsToken, GcmToken, Session, Subscription, Topic
 from ..base import BaseTestCase
+from ..factories.subscription import SubscriptionFactory
 
 
 class TestFindTokenEndpointArns(BaseTestCase):
 
     def setUp(self):
 
-        self.actor = SubscribeTopicActor()
+        self.actor = UnsubscribeTopicActor()
 
     def test_when_there_exists_an_apns_token(self):
 
@@ -50,7 +51,7 @@ class TestFindTopicArn(BaseTestCase):
 
     def setUp(self):
 
-        self.actor = SubscribeTopicActor()
+        self.actor = UnsubscribeTopicActor()
 
     def test_when_ther_exists_a_topic(self):
 
@@ -65,66 +66,48 @@ class TestFindTopicArn(BaseTestCase):
         self.assertIsNone(self.actor.find_topic_arn('qq'))
 
 
+class TestFindSubscriptions(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = UnsubscribeTopicActor()
+
+    def test(self):
+
+        s = Subscription(topic_arn='t', endpoint_arn='e', subscription_arn='s')
+        session = Session()
+        session.add(s)
+        session.commit()
+
+        subscriptions = self.actor.find_subscriptions(
+            topic_arn='t',
+            endpoint_arns=['e']
+        )
+        self.assertEqual(subscriptions, [s])
+
+
 class TestCallSnsApi(BaseTestCase):
 
     def setUp(self):
 
-        self.actor = SubscribeTopicActor()
+        self.actor = UnsubscribeTopicActor()
         self.actor.sns_conn = MagicMock()
 
     def test(self):
 
-        self.actor.call_sns_api('topic-arn', 'endpoint-arn')
-        self.actor.sns_conn.subscribe.assert_called_with(
-            'topic-arn',
-            'application',
-            'endpoint-arn'
-        )
-
-
-class TestGetArnFromResponse(BaseTestCase):
-
-    def setUp(self):
-
-        self.actor = SubscribeTopicActor()
-
-    def test(self):
-
-        resp = {
-            'SubscribeResponse': {
-                'ResponseMetadata': {'RequestId': 'xxx'},
-                'SubscribeResult': {'SubscriptionArn': 'arn'}
-            }
-        }
-        self.assertEqual(self.actor.get_arn_from_response(resp), 'arn')
-
-
-class TestSaveSubscription(BaseTestCase):
-
-    def setUp(self):
-
-        self.actor = SubscribeTopicActor()
-
-    def test(self):
-
-        self.actor.save_subscription('t-arn', 'e-arn', 's-arn')
-
-        s = Session().query(Subscription).first()
-        self.assertEqual(s.topic_arn, 't-arn')
-        self.assertEqual(s.endpoint_arn, 'e-arn')
-        self.assertEqual(s.subscription_arn, 's-arn')
+        self.actor.call_sns_api('subscription-arn')
+        self.actor.sns_conn.unsubscribe.assert_called_with('subscription-arn')
 
 
 class TestRun(BaseTestCase):
 
     def setUp(self):
 
-        self.actor = SubscribeTopicActor()
+        self.actor = UnsubscribeTopicActor()
         self.actor.find_token_endpoint_arns = MagicMock()
         self.actor.find_topic_arn = MagicMock()
+        self.actor.find_subscriptions = MagicMock()
         self.actor.call_sns_api = MagicMock()
-        self.actor.get_arn_from_response = MagicMock()
-        self.actor.save_subscription = MagicMock()
 
     def test_when_token_is_not_present(self):
 
@@ -161,18 +144,19 @@ class TestRun(BaseTestCase):
     def test_when_everything_is_ok(self):
 
         message = {'args': {'token': 'qq', 'topic': 'gg'}}
+        s = SubscriptionFactory()
+
+        # If this line is not present, run() method will raise exception
+        # saying it cannot delete the subscription instance due to it is
+        # not persisted.
+        # TODO figure out why
+        self.assertIsNotNone(Session().query(Subscription).first())
 
         self.actor.find_token_endpoint_arns.return_value = ['endpoint-arn']
         self.actor.find_topic_arn.return_value = 'topic-arn'
-        self.actor.call_sns_api.return_value = resp = MagicMock()
-        self.actor.get_arn_from_response.return_value = 'subscription-arn'
+        self.actor.find_subscriptions.return_value = [s]
 
         self.actor.run(message)
 
-        self.actor.call_sns_api.assert_called_with('topic-arn', 'endpoint-arn')
-        self.actor.get_arn_from_response.assert_called_with(resp)
-        self.actor.save_subscription.assert_called_with(
-            'topic-arn',
-            'endpoint-arn',
-            'subscription-arn'
-        )
+        self.actor.call_sns_api.assert_called_with(s.subscription_arn)
+        self.assertIsNone(Session().query(Subscription).first())
