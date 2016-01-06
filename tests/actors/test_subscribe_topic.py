@@ -3,13 +3,10 @@
 # standard library imports
 
 # third party related imports
-from boto.exception import BotoServerError
 from mock import MagicMock
-import ujson
 
 # local library imports
 from mobile_push.actors.subscribe_topic import SubscribeTopicActor
-from mobile_push.config import setting
 from mobile_push.db import ApnsToken, GcmToken, Session, Subscription, Topic
 from ..base import BaseTestCase
 
