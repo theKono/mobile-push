@@ -49,7 +49,20 @@ class TestRun(BaseTestCase):
     def setUp(self):
 
         self.actor = PublishToTopicActor()
+        self.actor.call_sns_api = MagicMock()
 
     def test_when_topic_is_not_present(self):
 
-        self.actor
+        self.actor.run({'args': {}})
+        self.assertFalse(self.actor.call_sns_api.called)
+
+    def test_when_topic_is_not_found(self):
+
+        self.actor.run({'args': {'topic': 'not-exist'}})
+        self.assertFalse(self.actor.call_sns_api.called)
+
+    def test_when_everything_is_ok(self):
+
+        self.actor.find_topic_arn = MagicMock(return_value='topic-arn')
+        self.actor.run({'args': {'topic': 't', 'message': 'so'}})
+        self.actor.call_sns_api.assert_called_with('topic-arn', 'so')
