@@ -4,7 +4,7 @@ A mobile-push microservice (APNS, GCM)
 ## Usage
 
 ### Environment
-The process will see `MOBILE_PUSH_ENV` environment variable to decide what configuration file to use.
+The process will see `MOBILE_PUSH_CONFIG` environment variable to decide what configuration file to use.
 The environment variable is mandatory.
 
 -----
@@ -12,7 +12,7 @@ The environment variable is mandatory.
 ### bin/competing_consumer.py
 
 ```
-MOBILE_PUSH_ENV=production python competing_consumer.py
+MOBILE_PUSH_CONFIG=production.ini python competing_consumer.py
 ```
 
 A script to poll SQS and perform actions.
