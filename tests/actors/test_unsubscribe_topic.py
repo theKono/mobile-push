@@ -7,63 +7,9 @@ from mock import MagicMock
 
 # local library imports
 from mobile_push.actors.unsubscribe_topic import UnsubscribeTopicActor
-from mobile_push.db import ApnsToken, GcmToken, Session, Subscription, Topic
+from mobile_push.db import Session, Subscription
 from ..base import BaseTestCase
 from ..factories.subscription import SubscriptionFactory
-
-
-class TestFindTokenEndpointArns(BaseTestCase):
-
-    def setUp(self):
-
-        self.actor = UnsubscribeTopicActor()
-
-    def test_when_there_exists_an_apns_token(self):
-
-        session = Session()
-        session.add(ApnsToken(
-            token='qq',
-            application_arn='app-arn',
-            endpoint_arn='arn'
-        ))
-        session.commit()
-
-        self.assertEqual(self.actor.find_token_endpoint_arns('qq'), ['arn'])
-
-    def test_when_there_exists_a_gcm_token(self):
-
-        session = Session()
-        session.add(GcmToken(
-            token='qq',
-            application_arn='app-arn',
-            endpoint_arn='arn'
-        ))
-        session.commit()
-
-        self.assertEqual(self.actor.find_token_endpoint_arns('qq'), ['arn'])
-
-    def test_when_there_is_no_such_token(self):
-
-        self.assertEqual(self.actor.find_token_endpoint_arns('gg'), [])
-
-
-class TestFindTopicArn(BaseTestCase):
-
-    def setUp(self):
-
-        self.actor = UnsubscribeTopicActor()
-
-    def test_when_ther_exists_a_topic(self):
-
-        session = Session()
-        session.add(Topic(name='qq', arn='arn'))
-        session.commit()
-
-        self.assertEqual(self.actor.find_topic_arn('qq'), 'arn')
-
-    def test_when_there_is_no_such_topic(self):
-
-        self.assertIsNone(self.actor.find_topic_arn('qq'))
 
 
 class TestFindSubscriptions(BaseTestCase):
