@@ -3,6 +3,7 @@
 # standard library imports
 from ConfigParser import SafeConfigParser
 import os.path
+import sys
 
 # third party related imports
 
@@ -10,9 +11,11 @@ import os.path
 
 
 __all__ = ['setting']
-
-
 setting = SafeConfigParser()
-env = os.environ['MOBILE_PUSH_ENV']
-cwd = os.path.dirname(os.path.abspath(__file__))
-setting.read(os.path.join(cwd, '..', env + '.ini'))
+
+if 'MOBILE_PUSH_CONFIG' not in os.environ:
+    sys.exit('Environment variable MOBILE_PUSH_CONFIG is not set')
+
+config_path = os.environ['MOBILE_PUSH_CONFIG']
+os.path.exists(config_path) or sys.exit('Cannot find %s' % config_path)
+setting.read(config_path)
