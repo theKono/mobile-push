@@ -4,21 +4,13 @@
 
 # third party related imports
 from boto.exception import BotoServerError
-from boto.sns import connect_to_region
 
 # local library imports
-from mobile_push.actors.base import BaseActor
-from mobile_push.config import setting
+from mobile_push.actors.base_sns import BaseSnsActor
 from mobile_push.logger import logger
-from mobile_push.db import Session, Topic
 
 
-class PublishToTopicActor(BaseActor):
-
-    def __init__(self):
-
-        super(PublishToTopicActor, self).__init__()
-        self.sns_conn = connect_to_region(setting.get('sns', 'region'))
+class PublishToTopicActor(BaseSnsActor):
 
     def run(self, message):
 
@@ -36,15 +28,9 @@ class PublishToTopicActor(BaseActor):
 
         try:
             self.call_sns_api(topic_arn, args.get('message'))
-        except BotoServerError as e:
-            logger.error(e)
-            logger.exception(e)
-
-    def find_topic_arn(self, topic):
-
-        session = Session()
-        row = session.query(Topic).get(topic)
-        return getattr(row, 'arn', None)
+        except BotoServerError as err:
+            logger.error(err)
+            logger.exception(err)
 
     def call_sns_api(self, topic_arn, message):
 
@@ -58,4 +44,3 @@ class PublishToTopicActor(BaseActor):
             topic_arn,
             message
         )
-

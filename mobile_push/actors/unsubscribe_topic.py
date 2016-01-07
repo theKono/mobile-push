@@ -3,21 +3,14 @@
 # standard library imports
 
 # third party related imports
-from boto.sns import connect_to_region
 
 # local library imports
-from mobile_push.actors.base import BaseActor
-from mobile_push.config import setting
+from mobile_push.actors.base_sns import BaseSnsActor
 from mobile_push.logger import logger
-from mobile_push.db import ApnsToken, GcmToken, Session, Subscription, Topic
+from mobile_push.db import Session, Subscription
 
 
-class UnsubscribeTopicActor(BaseActor):
-
-    def __init__(self):
-
-        super(UnsubscribeTopicActor, self).__init__()
-        self.sns_conn = connect_to_region(setting.get('sns', 'region'))
+class UnsubscribeTopicActor(BaseSnsActor):
 
     def run(self, message):
 
@@ -49,22 +42,6 @@ class UnsubscribeTopicActor(BaseActor):
             session.delete(s)
 
         session.commit()
-
-    def find_token_endpoint_arns(self, token):
-
-        session = Session()
-        rows = session.query(ApnsToken).filter_by(token=token).all()
-
-        if len(rows) == 0:
-            rows = session.query(GcmToken).filter_by(token=token).all()
-
-        return [r.endpoint_arn for r in rows]
-
-    def find_topic_arn(self, topic):
-
-        session = Session()
-        row = session.query(Topic).get(topic)
-        return getattr(row, 'arn', None)
 
     def find_subscriptions(self, topic_arn, endpoint_arns):
 

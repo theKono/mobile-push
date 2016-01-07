@@ -3,22 +3,15 @@
 # standard library imports
 
 # third party related imports
-from boto.sns import connect_to_region
 from sqlalchemy.exc import IntegrityError
 
 # local library imports
-from mobile_push.actors.base import BaseActor
-from mobile_push.config import setting
+from mobile_push.actors.base_sns import BaseSnsActor
 from mobile_push.logger import logger
-from mobile_push.db import ApnsToken, GcmToken, Session, Subscription, Topic
+from mobile_push.db import Session, Subscription
 
 
-class SubscribeTopicActor(BaseActor):
-
-    def __init__(self):
-
-        super(SubscribeTopicActor, self).__init__()
-        self.sns_conn = connect_to_region(setting.get('sns', 'region'))
+class SubscribeTopicActor(BaseSnsActor):
 
     def run(self, message):
 
@@ -47,21 +40,6 @@ class SubscribeTopicActor(BaseActor):
             api_response = self.call_sns_api(topic_arn, endpoint_arn)
             subscription_arn = self.get_arn_from_response(api_response)
             self.save_subscription(topic_arn, endpoint_arn, subscription_arn)
-
-    def find_token_endpoint_arns(self, token):
-
-        session = Session()
-        rows = session.query(ApnsToken).filter_by(token=token).all()
-        if len(rows) == 0:
-            rows = session.query(GcmToken).filter_by(token=token).all()
-
-        return map(lambda row: row.endpoint_arn, rows)
-
-    def find_topic_arn(self, topic):
-
-        session = Session()
-        row = session.query(Topic).get(topic)
-        return getattr(row, 'arn', None)
 
     def call_sns_api(self, topic_arn, endpoint_arn):
 
@@ -94,5 +72,5 @@ class SubscribeTopicActor(BaseActor):
                 subscription_arn
             )
 
-        except IntegrityError as e:
-            logger.warn(e)
+        except IntegrityError as err:
+            logger.warn(err)
