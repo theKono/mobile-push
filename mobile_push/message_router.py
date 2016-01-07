@@ -9,6 +9,7 @@
 from mobile_push.actors.create_apns_token import CreateApnsTokenActor
 from mobile_push.actors.create_gcm_token import CreateGcmTokenActor
 from mobile_push.actors.create_topic import CreateTopicActor
+from mobile_push.actors.direct_publish import DirectPublishActor
 from mobile_push.actors.publish_to_topic import PublishToTopicActor
 from mobile_push.actors.subscribe_topic import SubscribeTopicActor
 from mobile_push.actors.unsubscribe_topic import UnsubscribeTopicActor
@@ -29,6 +30,7 @@ class MessageRouter(object):
         'subscribe_topic': SubscribeTopicActor,
         'unsubscribe_topic': UnsubscribeTopicActor,
         'publish_to_topic': PublishToTopicActor,
+        'direct_publish': DirectPublishActor,
     }
 
     def __init__(self, message):
