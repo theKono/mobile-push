@@ -35,8 +35,6 @@ class DirectPublishActor(BaseSnsActor):
 
     def call_sns_api(self, target_arn, message):
 
-        logger.info('call_sns_api')
-
         try:
             self.sns_conn.publish(
                 message=message,
