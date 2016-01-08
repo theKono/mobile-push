@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# After application is copied to final destination folder
+
+exe=/opt/mobile-push/bin/python
+new_release_dir=/srv/mobile-push/release/{{tag}}
+
+cd $new_release_dir
+$exe setup.py develop
+rm /srv/mobile-push/current
+ln -s $new_release_dir /srv/mobile-push/current
+service supervisor restart
