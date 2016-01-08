@@ -1,5 +1,12 @@
 Change-log for mobile-push.
-
-This file will be added to as part of each release
-
 ----
+
+0.1.0 / 2016-01-08
+==================
+- Create a topic
+- Creaet APNS token
+- Create GCM token
+- Subscribe a topic
+- Unsubscribe a topic
+- Publish message to a topic
+- Direct publish message to a topic
