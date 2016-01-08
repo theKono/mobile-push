@@ -47,7 +47,8 @@ rm -rf $folder $revision
 # Deploy
 #
 aws deploy create-deployment \
-  --aplication-name MobilePush \
+  --region us-east-1 \
+  --application-name MobilePush \
   --deployment-group-name Production \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --description $version \
