@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Deploy script
+
+#
+# ARGV
+#
+if [[ $# -ne 3 ]]; then
+    echo "usage: $0 <app-version> <config-path> <s3-bucket>"
+    exit 1
+fi
+
+version=$1
+config=$2
+bucket=$3
+
+#
+# Download code
+#
+repository=mobile-push
+bundle=$version.tar.gz
+folder="$repository-$version"
+
+wget https://github.com/theKono/$repository/archive/$bundle
+tar xf $bundle
+rm $bundle
+
+#
+# Prepare stuffs for AWS CodeDeploy
+#
+cp $config $folder/config.ini
+cp appspec.yml.tmpl $folder/appspec.yml
+cp after_install.sh.tmpl $folder/deploy/after_install.sh
+sed -i "s/{{tag}}/$version/" $folder/appspec.yml $folder/deploy/after_install.sh
+
+#
+# Archive and upload to S3
+#
+revision=$version.tgz
+key=mobile-push/$revision
+
+tar zcvf $version.tgz -C $folder .
+aws s3 cp $revision s3://$bucket/$key
+rm -rf $folder $revision
+
+#
+# Deploy
+#
+aws deploy create-deployment \
+  --aplication-name MobilePush \
+  --deployment-group-name Production \
+  --deployment-config-name CodeDeployDefault.OneAtATime \
+  --description $version \
+  --s3-location bucket=$bucket,bundleType=tgz,key=$key
