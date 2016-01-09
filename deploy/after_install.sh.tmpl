@@ -4,8 +4,10 @@
 
 if [[ "$DEPLOYMENT_GROUP_NAME" == "Staging" ]]; then
     name=mobile-push-staging
+    supervisor_prog=competing-consumer-staging
 else
     name=mobile-push
+    supervisor_prog=competing-consumer
 fi
 
 exe=/opt/$name/bin/python
@@ -15,4 +17,4 @@ cd $new_release_dir
 $exe setup.py develop
 rm /srv/$name/current
 ln -s $new_release_dir /srv/$name/current
-supervisorctl restart $name
+supervisorctl restart $supervisor_prog
