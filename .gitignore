@@ -60,6 +60,7 @@ target/
 production.ini
 development.ini
 test.ini
+staging.ini
 pylint
 *.sqlite
 *.swp
