@@ -5,14 +5,20 @@
 #
 # ARGV
 #
-if [[ $# -ne 3 ]]; then
-    echo "usage: $0 <app-version> <config-path> <s3-bucket>"
+if [[ $# -ne 4 ]]; then
+    echo "usage: $0 <deployment-group> <app-version> <config-path> <s3-bucket>"
     exit 1
 fi
 
-version=$1
-config=$2
-bucket=$3
+deployment_group=$1
+version=$2
+config=$3
+bucket=$4
+program=mobile-push
+
+if [[ $deployment_group == "Staging" ]]; then
+    program=mobile-push-staging
+fi
 
 #
 # Download code
@@ -32,6 +38,7 @@ cp $config $folder/config.ini
 cp appspec.yml.tmpl $folder/appspec.yml
 cp after_install.sh.tmpl $folder/deploy/after_install.sh
 sed -i "s/{{tag}}/$version/" $folder/appspec.yml $folder/deploy/after_install.sh
+sed -i "s/{{program}}/$program/" $folder/appspec.yml
 
 #
 # Archive and upload to S3
@@ -49,7 +56,7 @@ rm -rf $folder $revision
 aws deploy create-deployment \
   --region us-east-1 \
   --application-name MobilePush \
-  --deployment-group-name Production \
+  --deployment-group-name $deployment_group \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --description $version \
   --s3-location bucket=$bucket,bundleType=tgz,key=$key
