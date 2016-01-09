@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /srv/mobile-push/release/{{tag}}
+    destination: /srv/{{program}}/release/{{tag}}
 hooks:
   AfterInstall:
     - location: deploy/after_install.sh

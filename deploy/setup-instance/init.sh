@@ -34,6 +34,7 @@ rm get-pip.py
 
 pip install virtualenv
 virtualenv /opt/mobile-push
+virtualenv /opt/mobile-push-staging
 
 #
 # install AWS CodeDeploy agent
@@ -52,7 +53,12 @@ mkdir -p /srv/mobile-push/release
 mkdir -p /srv/mobile-push/share
 chown -R ubuntu:ubuntu /srv/mobile-push
 
+mkdir -p /srv/mobile-push-staging/release
+mkdir -p /srv/mobile-push-staging/share
+chown -R ubuntu:ubuntu /srv/mobile-push-staging
+
 #
 # supervisor
 #
 cp ./competing-consumer.conf /etc/supervisor/conf.d/
+cp ./competing-consumer-staging.conf /etc/supervisor/conf.d/
