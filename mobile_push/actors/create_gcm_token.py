@@ -47,6 +47,7 @@ class CreateGcmTokenActor(CreateApnsTokenActor):
 
         except IntegrityError as e:
             logger.warn(e)
+            session.rollback()
 
 
 if __name__ == '__main__':
