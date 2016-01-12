@@ -1,6 +1,10 @@
 Change-log for mobile-push.
 ----
 
+0.2.3 / 2016-01-12
+==================
+- Fix database session error
+
 0.2.2 / 2016-01-12
 ==================
 - Fix error: document
