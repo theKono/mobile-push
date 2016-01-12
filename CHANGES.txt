@@ -1,6 +1,10 @@
 Change-log for mobile-push.
 ----
 
+0.2.2 / 2016-01-12
+==================
+- Fix error: document
+
 0.2.1 / 2016-01-09
 ==================
 - Fix error: wrong supervisor program name
