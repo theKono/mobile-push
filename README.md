@@ -27,7 +27,7 @@ Create a topic in SNS.
 {
     "action": "create_topic",
     "args": {
-        "topic": "topic-name"
+        "name": "topic-name"
     }
 }
 ```
