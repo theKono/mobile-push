@@ -74,3 +74,4 @@ class SubscribeTopicActor(BaseSnsActor):
 
         except IntegrityError as err:
             logger.warn(err)
+            session.rollback()
