@@ -5,7 +5,6 @@ import re
 
 # third party related imports
 from boto.exception import BotoServerError
-from boto.sns import connect_to_region
 from sqlalchemy.exc import IntegrityError
 import ujson
 
@@ -17,11 +16,6 @@ from mobile_push.db import ApnsToken, Session
 
 
 class CreateApnsTokenActor(BaseActor):
-
-    def __init__(self):
-
-        super(CreateApnsTokenActor, self).__init__()
-        self.sns_conn = connect_to_region(setting.get('sns', 'region'))
 
     def iter_application_arns(self):
 
@@ -60,7 +54,7 @@ class CreateApnsTokenActor(BaseActor):
 
     def call_sns_api(self, app_arn, token, user_data):
 
-        result = self.sns_conn.create_platform_endpoint(
+        result = self.connect_sns().create_platform_endpoint(
             platform_application_arn=app_arn,
             token=token,
             custom_user_data=user_data

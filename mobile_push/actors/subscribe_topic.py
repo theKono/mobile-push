@@ -43,7 +43,8 @@ class SubscribeTopicActor(BaseSnsActor):
 
     def call_sns_api(self, topic_arn, endpoint_arn):
 
-        ret = self.sns_conn.subscribe(topic_arn, 'application', endpoint_arn)
+        sns_conn = self.connect_sns()
+        ret = sns_conn.subscribe(topic_arn, 'application', endpoint_arn)
         logger.info('subscribe(%s, application, %s)', topic_arn, endpoint_arn)
         return ret
 

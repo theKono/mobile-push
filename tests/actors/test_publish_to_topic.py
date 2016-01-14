@@ -15,12 +15,13 @@ class TestCallSnsApi(BaseTestCase):
     def setUp(self):
 
         self.actor = PublishToTopicActor()
-        self.actor.sns_conn = MagicMock()
+        self.sns_conn = MagicMock()
+        self.actor.connect_sns = MagicMock(return_value=self.sns_conn)
 
     def test(self):
 
         self.actor.call_sns_api('topic-arn', 'message')
-        self.actor.sns_conn.publish.assert_called_with(
+        self.sns_conn.publish.assert_called_with(
             topic='topic-arn',
             message='message',
             message_structure='json'

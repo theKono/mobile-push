@@ -52,7 +52,7 @@ class UnsubscribeTopicActor(BaseSnsActor):
 
     def call_sns_api(self, subscription_arn):
 
-        self.sns_conn.unsubscribe(subscription_arn)
+        self.connect_sns().unsubscribe(subscription_arn)
 
 
 if __name__ == '__main__':

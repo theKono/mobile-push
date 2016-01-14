@@ -16,11 +16,6 @@ from mobile_push.logger import logger
 
 class CreateTopicActor(BaseActor):
 
-    def __init__(self):
-
-        super(CreateTopicActor, self).__init__()
-        self.sns_conn = connect_to_region(setting.get('sns', 'region'))
-
     def run(self, message):
 
         if message.get('args', {}).get('name') is None:
@@ -30,7 +25,7 @@ class CreateTopicActor(BaseActor):
         topic_name = message['args']['name']
 
         try:
-            resp = self.sns_conn.create_topic(topic_name)
+            resp = self.connect_sns().create_topic(topic_name)
             logger.info('Create topic(%s) to SNS', topic_name)
         except BotoServerError as e:
             logger.error(e)

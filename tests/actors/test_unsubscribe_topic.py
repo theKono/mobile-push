@@ -37,12 +37,13 @@ class TestCallSnsApi(BaseTestCase):
     def setUp(self):
 
         self.actor = UnsubscribeTopicActor()
-        self.actor.sns_conn = MagicMock()
+        self.sns_conn = MagicMock()
+        self.actor.connect_sns = MagicMock(return_value=self.sns_conn)
 
     def test(self):
 
         self.actor.call_sns_api('subscription-arn')
-        self.actor.sns_conn.unsubscribe.assert_called_with('subscription-arn')
+        self.sns_conn.unsubscribe.assert_called_with('subscription-arn')
 
 
 class TestRun(BaseTestCase):

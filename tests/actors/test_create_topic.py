@@ -17,16 +17,17 @@ class TestRun(BaseTestCase):
     def setUp(self):
 
         self.actor = CreateTopicActor()
-        self.actor.sns_conn = MagicMock()
+        self.sns_conn = MagicMock()
+        self.actor.connect_sns = MagicMock(return_value=self.sns_conn)
 
     def test_when_name_is_not_present(self):
 
         self.actor.run({'args': {}})
-        self.assertFalse(self.actor.sns_conn.create_topic.called)
+        self.assertFalse(self.sns_conn.create_topic.called)
 
     def test_when_sns_api_failed(self):
 
-        self.actor.sns_conn.create_topic = MagicMock(
+        self.sns_conn.create_topic = MagicMock(
             side_effect=BotoServerError(403, ':)')
         )
         self.actor.run({'args': {'name': 'qq'}})
@@ -36,7 +37,7 @@ class TestRun(BaseTestCase):
 
     def test_when_everything_is_ok(self):
 
-        self.actor.sns_conn.create_topic.return_value = {
+        self.sns_conn.create_topic.return_value = {
             'CreateTopicResponse': {
                 'CreateTopicResult': {'TopicArn': 'an-arn'},
                 'ResponseMetadata': {'RequestId': 'xxx'}
