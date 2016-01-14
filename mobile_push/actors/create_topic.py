@@ -5,6 +5,7 @@
 # third party related imports
 from boto.exception import BotoServerError
 from boto.sns import connect_to_region
+from sqlalchemy.exc import IntegrityError
 
 # local library imports
 from mobile_push.actors.base import BaseActor
@@ -48,11 +49,15 @@ class CreateTopicActor(BaseActor):
             logger.error('Cannot obtain topic arn: %s', topic_name)
             return
 
-        session = Session()
-        session.add(Topic(name=topic_name, arn=arn))
-        session.commit()
+        try:
+            session = Session()
+            session.add(Topic(name=topic_name, arn=arn))
+            session.commit()
+            logger.info('Save topic(%s) into database', topic_name)
 
-        logger.info('Save topic(%s) into database', topic_name)
+        except IntegrityError as e:
+            logger.warn(e)
+            session.rollback()
 
 
 if __name__ == '__main__':
