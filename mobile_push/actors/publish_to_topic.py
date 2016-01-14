@@ -34,7 +34,7 @@ class PublishToTopicActor(BaseSnsActor):
 
     def call_sns_api(self, topic_arn, message):
 
-        self.sns_conn.publish(
+        self.connect_sns().publish(
             topic=topic_arn,
             message=message,
             message_structure='json',

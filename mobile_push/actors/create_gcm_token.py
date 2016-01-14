@@ -3,7 +3,6 @@
 # standard library imports
 
 # third party related imports
-from boto.sns import connect_to_region
 from sqlalchemy.exc import IntegrityError
 
 # local library imports
@@ -14,11 +13,6 @@ from mobile_push.db import GcmToken, Session
 
 
 class CreateGcmTokenActor(CreateApnsTokenActor):
-
-    def __init__(self):
-
-        super(CreateGcmTokenActor, self).__init__()
-        self.sns_conn = connect_to_region(setting.get('sns', 'region'))
 
     def iter_application_arns(self):
 

@@ -36,7 +36,7 @@ class DirectPublishActor(BaseSnsActor):
     def call_sns_api(self, target_arn, message):
 
         try:
-            self.sns_conn.publish(
+            self.connect_sns().publish(
                 message=message,
                 message_structure='json',
                 target_arn=target_arn
