@@ -1,6 +1,10 @@
 Change-log for mobile-push.
 ----
 
+0.2.5 / 2016-01-14
+==================
+- Avoid connecting to sns in actors' constructor
+
 0.2.4 / 2016-01-14
 ==================
 - Allow idempotently create topic
