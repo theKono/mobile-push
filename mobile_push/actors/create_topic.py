@@ -4,12 +4,10 @@
 
 # third party related imports
 from boto.exception import BotoServerError
-from boto.sns import connect_to_region
 from sqlalchemy.exc import IntegrityError
 
 # local library imports
 from mobile_push.actors.base import BaseActor
-from mobile_push.config import setting
 from mobile_push.db import Session, Topic
 from mobile_push.logger import logger
 
