@@ -3,6 +3,7 @@
 # standard library imports
 
 # third party related imports
+from sqlalchemy import literal
 from sqlalchemy.exc import IntegrityError
 
 # local library imports
@@ -37,6 +38,9 @@ class SubscribeTopicActor(BaseSnsActor):
             return
 
         for endpoint_arn in endpoint_arns:
+            if self.has_subscription(topic_arn, endpoint_arn):
+                continue
+
             api_response = self.call_sns_api(topic_arn, endpoint_arn)
             subscription_arn = self.get_arn_from_response(api_response)
             self.save_subscription(topic_arn, endpoint_arn, subscription_arn)
@@ -76,3 +80,10 @@ class SubscribeTopicActor(BaseSnsActor):
         except IntegrityError as err:
             logger.warn(err)
             session.rollback()
+
+    def has_subscription(self, topic_arn, endpoint_arn):
+
+        session = Session()
+        q = session.query(Subscription)
+        q = q.filter_by(topic_arn=topic_arn, endpoint_arn=endpoint_arn)
+        return session.query(literal(True)).filter(q.exists()).scalar()
