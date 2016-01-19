@@ -35,6 +35,7 @@ class CreateApnsTokenActor(BaseActor):
 
         for app_arn in self.iter_application_arns():
             if self.has_platform_endpoint(token, app_arn):
+                logger.info('Token %s exists', token)
                 continue
 
             try:

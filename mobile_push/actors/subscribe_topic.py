@@ -39,6 +39,7 @@ class SubscribeTopicActor(BaseSnsActor):
 
         for endpoint_arn in endpoint_arns:
             if self.has_subscription(topic_arn, endpoint_arn):
+                logger.info('Subscription exists')
                 continue
 
             api_response = self.call_sns_api(topic_arn, endpoint_arn)
