@@ -9,6 +9,7 @@ from mock import MagicMock
 from mobile_push.actors.subscribe_topic import SubscribeTopicActor
 from mobile_push.db import Session, Subscription
 from ..base import BaseTestCase
+from ..factories.subscription import SubscriptionFactory
 
 
 class TestCallSnsApi(BaseTestCase):
@@ -62,6 +63,22 @@ class TestSaveSubscription(BaseTestCase):
         self.assertEqual(s.subscription_arn, 's-arn')
 
 
+class TestHasSubscription(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = SubscribeTopicActor()
+
+    def test_when_subscription_exists(self):
+
+        SubscriptionFactory.create(topic_arn='ttt', endpoint_arn='eee')
+        self.assertTrue(self.actor.has_subscription('ttt', 'eee'))
+
+    def test_when_subscription_does_not_exist(self):
+
+        self.assertFalse(self.actor.has_subscription('ttt', 'eee'))
+
+
 class TestRun(BaseTestCase):
 
     def setUp(self):
@@ -102,6 +119,16 @@ class TestRun(BaseTestCase):
 
         self.actor.find_token_endpoint_arns.return_value = [True]
         self.actor.find_topic_arn.return_value = None
+        self.actor.run(message)
+        self.assertFalse(self.actor.call_sns_api.called)
+
+    def test_when_subscription_exists(self):
+
+        message = {'args': {'token': 'qq', 'topic': 'gg'}}
+
+        self.actor.find_token_endpoint_arns.return_value = ['eee']
+        self.actor.find_topic_arn.return_value = 'ttt'
+        self.actor.has_subscription = MagicMock(return_value=True)
         self.actor.run(message)
         self.assertFalse(self.actor.call_sns_api.called)
 

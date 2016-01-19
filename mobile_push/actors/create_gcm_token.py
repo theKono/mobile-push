@@ -3,6 +3,7 @@
 # standard library imports
 
 # third party related imports
+from sqlalchemy import literal
 from sqlalchemy.exc import IntegrityError
 
 # local library imports
@@ -42,6 +43,13 @@ class CreateGcmTokenActor(CreateApnsTokenActor):
         except IntegrityError as e:
             logger.warn(e)
             session.rollback()
+
+    def has_platform_endpoint(self, token, app_arn):
+
+        session = Session()
+        q = session.query(GcmToken)
+        q = q.filter_by(token=token, application_arn=app_arn)
+        return session.query(literal(True)).filter(q.exists()).scalar()
 
 
 if __name__ == '__main__':
