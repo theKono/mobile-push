@@ -12,6 +12,7 @@ from mobile_push.actors.create_apns_token import CreateApnsTokenActor
 from mobile_push.config import setting
 from mobile_push.db import ApnsToken, Session
 from ..base import BaseTestCase
+from ..factories.apns_token import ApnsTokenFactory
 
 
 class TestIterApplicationArns(BaseTestCase):
@@ -116,6 +117,22 @@ class TestSaveEndpointArn(BaseTestCase):
         self.assertEqual(apns_token.user_data, 'qq')
 
 
+class TestHasPlatformEndpoint(BaseTestCase):
+
+    def setUp(self):
+
+        self.actor = CreateApnsTokenActor()
+
+    def test_when_apns_token_exist(self):
+
+        ApnsTokenFactory.create(token='ttt', application_arn='aaa')
+        self.assertTrue(self.actor.has_platform_endpoint('ttt', 'aaa'))
+
+    def test_when_apns_token_does_not_exist(self):
+
+        self.assertFalse(self.actor.has_platform_endpoint('ttt', 'aaa'))
+
+
 class TestRun(BaseTestCase):
 
     def setUp(self):
@@ -125,8 +142,15 @@ class TestRun(BaseTestCase):
 
     def test_when_token_is_not_present(self):
 
-        self.actor.run({'args': {}})
         self.actor.call_sns_api = MagicMock()
+        self.actor.run({'args': {}})
+        self.assertFalse(self.actor.call_sns_api.called)
+
+    def test_when_platform_endpoint_exist(self):
+
+        self.actor.has_platform_endpoint = MagicMock(return_value=True)
+        self.actor.call_sns_api = MagicMock()
+        self.actor.run({'args': {'token': 'qq', 'user_data': {}}})
         self.assertFalse(self.actor.call_sns_api.called)
 
     def test_when_sns_api_raises_boto_server_error(self):
