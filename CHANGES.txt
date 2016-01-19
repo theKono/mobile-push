@@ -1,6 +1,10 @@
 Change-log for mobile-push.
 ----
 
+0.2.6 / 2016-01-19
+==================
+- Save an AWS API call if target exists.
+
 0.2.5 / 2016-01-14
 ==================
 - Avoid connecting to sns in actors' constructor
