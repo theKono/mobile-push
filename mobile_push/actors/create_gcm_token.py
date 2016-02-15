@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=missing-docstring
 
 # standard library imports
 
