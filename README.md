@@ -120,4 +120,22 @@ Publish a message to a device. The message should conform to SNS format.
 MOBILE_PUSH_CONFIG=production.ini python get_endpoint_attributes.py <token>
 ```
 
-A script to get endpoint attribute of an APNS token or GCM token.
+A script to get endpoint attributes of an APNS token or GCM token.
+
+---
+
+### bin/set_endpoint_attributes.py
+
+```
+MOBILE_PUSH_CONFIG=production.ini python get_endpoint_attributes.py [-h]
+                                                                    [--customer-data CUSTOMER_DATA]
+                                                                    [--enable ENABLE]
+                                                                    <apns-token>
+```
+
+A script to set endpoint attributes of an APNS token.
+
+Arguments:
+- `apns-token`: APNS token to set attributes
+- `customer-data`: Set arbitrary user data to associate with the endpoint
+- `enable`: Flag that enables/disables delivery to the endpoint
