@@ -111,3 +111,13 @@ Publish a message to a device. The message should conform to SNS format.
     }
 }
 ```
+
+---
+
+### bin/get_endpoint_attributes.py
+
+```
+MOBILE_PUSH_CONFIG=production.ini python get_endpoint_attributes.py <token>
+```
+
+A script to get endpoint attribute of an APNS token or GCM token.
